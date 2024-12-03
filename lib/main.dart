@@ -12,6 +12,7 @@ class MyPortfolioApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mon portfolio',
       theme: ThemeData(primarySwatch: Colors.blue),
+      debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),

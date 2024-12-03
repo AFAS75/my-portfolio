@@ -72,6 +72,7 @@ flutter:
     - assets/test3.png
     - assets/test4.png
     - assets/your_weather.png
+    - assets/drawer_background.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

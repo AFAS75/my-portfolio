@@ -1,59 +1,23 @@
 import 'package:flutter/material.dart';
 // import 'package:particles_flutter/particles_engine.dart';
 
-class SliverAppBarComponent extends StatefulWidget {
+class AppBarComponent extends StatefulWidget {
   final VoidCallback scrollToAboutSection;
 
-  const SliverAppBarComponent({super.key, required this.scrollToAboutSection});
+  const AppBarComponent({super.key, required this.scrollToAboutSection});
 
   @override
-  _SliverAppBarComponentState createState() => _SliverAppBarComponentState();
+  _AppBarComponentState createState() => _AppBarComponentState();
 }
-//   Widget build(BuildContext context) {
-//     return SliverAppBar(
-//       pinned: true,
-//       backgroundColor: Color(0xff052555),
-//       expandedHeight: 200.0,
-//       iconTheme: IconThemeData(color: Colors.white),
-//       flexibleSpace: FlexibleSpaceBar(
-//        background: Container(
-//         child: Stack(
-//          children: <Widget>[
-//            Container(
-//             margin: EdgeInsets.all(10.0),
-//             alignment: Alignment.centerLeft,
-//             child: Text(
-//               'Andrés Angulo',
-//               style: TextStyle(
-//                 color: Colors.white
-//                 )),
-//            ),
-//            Container(
-//             margin: EdgeInsets.all(10.0),
-//             alignment:Alignment(-1, 0.15),
-//             child: Text(
-//               'Developpeur web fullStack',
-//               style: TextStyle(
-//                 color: Colors.white
-//               )),
-//            ),
-//            Container(
-//             alignment: Alignment(1, 0),
-//             child: Image.asset('assets/portrait.png'),
-//            )
-//           ],
-//         ),
-//        )
-//       )
-//     );
-//   }
-class _SliverAppBarComponentState extends State<SliverAppBarComponent> with TickerProviderStateMixin {
+
+class _AppBarComponentState extends State<AppBarComponent> with TickerProviderStateMixin {
   late AnimationController _controllerButton;
   late Animation<double> _animationButton;
   late AnimationController _fadeControllerButton;
   late Animation<double> _fadeAnimationButton;
   late AnimationController _textController;
   late Animation<Offset> _offsetAnimation;
+  late Animation<Offset> _offsetAnimationBis;
   late Animation<double> _fadeAnimation;
   late AnimationController _controllerBackground;
   late Animation<Offset> _slideAnimationBackground;
@@ -108,7 +72,7 @@ class _SliverAppBarComponentState extends State<SliverAppBarComponent> with Tick
     // }).toList();
 
     _textController = AnimationController(
-      duration: Duration(seconds: 3),
+      duration: Duration(seconds: 4),
       vsync: this,
     ); 
     _offsetAnimation = Tween<Offset>(
@@ -118,7 +82,14 @@ class _SliverAppBarComponentState extends State<SliverAppBarComponent> with Tick
       parent: _textController, 
       curve: Curves.easeInOut
     ));
-      _fadeAnimation = Tween<double>(
+    _offsetAnimationBis = Tween<Offset>(
+      begin: Offset(0.0, 0.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _textController, 
+      curve: Curves.easeInOut
+    ));
+    _fadeAnimation = Tween<double>(
       begin: 0.1,
       end: 1.0,
     ).animate(CurvedAnimation(
@@ -228,9 +199,24 @@ class _SliverAppBarComponentState extends State<SliverAppBarComponent> with Tick
                 children: <Widget>[
                   Positioned(
                     left: 30,
-                    // width: MediaQuery.of(context).size.width,
-                    top: MediaQuery.of(context).size.height / 2 - 12,
-                    // left: 20,
+                    top: MediaQuery.of(context).size.height / 2 - 52,
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SlideTransition(
+                        position: _offsetAnimationBis,
+                        child: 
+                        Text(
+                          'Bienvenue',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20.0,
+                          )),
+                        ),
+                      )
+                  ),
+                  Positioned(
+                    left: 30,
+                    top: MediaQuery.of(context).size.height / 2 - 22,
                     child: Row(
                       children: List.generate(name.length, (index) {
                         return FadeTransition(
@@ -238,7 +224,6 @@ class _SliverAppBarComponentState extends State<SliverAppBarComponent> with Tick
                           child: SlideTransition(
                             position: Tween<Offset>(
                               begin: _getOffsetForLetter(index, name.length),
-                              // begin: Offset(0.0, 1.0),
                               end: Offset.zero, 
                             ).animate(_letterAnimations[index]),
                             child: Text(
@@ -256,7 +241,6 @@ class _SliverAppBarComponentState extends State<SliverAppBarComponent> with Tick
                   Positioned(
                     left: 30,
                     top: MediaQuery.of(context).size.height / 2 + 12,
-                    // width: MediaQuery.of(context).size.width,
                     child: FadeTransition(
                       opacity: _fadeAnimation,
                       child: SlideTransition(
@@ -265,60 +249,17 @@ class _SliverAppBarComponentState extends State<SliverAppBarComponent> with Tick
                         Text(
                           'Bienvenido',
                           style: TextStyle(
-                            color: Colors.white
+                            color: Colors.white,
+                            fontSize: 20.0,
                           )),
                         ),
                       )
                   ),
-                  // Container(
-                  //   margin: EdgeInsets.all(10.0),
-                  //   alignment: Alignment.centerLeft,
-                  //   child: Text(
-                  //     'Andrés Angulo',
-                  //     style: TextStyle(
-                  //       color: Colors.white
-                  //     )),
-                  // ),
-                  // Container(
-                  //   margin: EdgeInsets.all(10.0),
-                  //   alignment:Alignment(-1, 0.15),
-                  //   child: Text(
-                  //     'Developpeur web fullStack',
-                  //     style: TextStyle(
-                  //       color: Colors.white
-                  //     )),
-                  // ),
-                  // Container(
-                  //   width: MediaQuery.of(context).size.width,
-                  //   height: MediaQuery.of(context).size.height,
-                  //   alignment: Alignment(1, 1),
-                  //   child: Image.asset('assets/test1.png'),
-                  // ),
                   Positioned(
                     bottom: 90,
                     left: MediaQuery.of(context).size.width / 2 - 100,
                     child: Stack(
                       children: [
-                        // for (int i = 0; i < _lightAnimations.length; i++)
-                        //   Positioned(
-                        //     left: -20 + i * 20.0,
-                        //     child: AnimatedBuilder(
-                        //       animation: _lightAnimations[i], 
-                        //       builder: (context, child) {
-                        //         return Transform.scale(
-                        //           scale: _lightAnimations[i].value,
-                        //           child: Container(
-                        //             width: 10,
-                        //             height: 10,
-                        //             decoration: BoxDecoration(
-                        //               shape: BoxShape.rectangle,
-                        //               color: Colors.white,
-                        //             ),
-                        //           ),
-                        //         );
-                        //       },
-                        //     ),
-                        //   ),
                         AnimatedBuilder(
                           animation: _animationButton, 
                           builder: (context, child) {

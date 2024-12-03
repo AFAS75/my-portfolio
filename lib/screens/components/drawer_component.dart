@@ -7,7 +7,8 @@ class DrawerComponent extends StatelessWidget {
   final GlobalKey skillsKey;
   final GlobalKey technoKey;
 
-  DrawerComponent({
+  const DrawerComponent({
+    super.key, 
     required this.scrollToSection,
     required this.aboutKey,
     required this.projectsKey,
@@ -18,54 +19,82 @@ class DrawerComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Column(
-        children: <Widget>[
-          DrawerHeader(
-            child: Container(
-              child: Text('MENU')
-            )
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const UserAccountsDrawerHeader(
+            accountName: Text(
+              'Andrés Angulo',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ), 
+            accountEmail: Text(
+              'Développeur FullStack',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              image: DecorationImage(
+                image: AssetImage('assets/drawer_background.jpeg'), 
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-          Expanded(
-            child: ListView(
-             children: <Widget>[
-              ListTile(
-                title: Text('À propos'),
-                onTap: () {
-                  Navigator.pop(context);
-                  scrollToSection(aboutKey);
-                },
-              ),
-              ListTile(
-                title: Text('Projets'),
-                onTap: () {
-                  Navigator.pop(context);
-                  scrollToSection(projectsKey);
-                },
-              ),
-              ListTile(
-                title: Text('Compétences'),
-                onTap: () {
-                  Navigator.pop(context);
-                  scrollToSection(skillsKey);
-                },
-              ),
-              ListTile(
-                title: Text('Technologies'),
-                onTap: () {
-                  Navigator.pop(context);
-                  scrollToSection(technoKey);
-                },
-              ),
-              ListTile(
-                title: Text('Contact'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/contact');
-                }
-              ),
-            ]),
+          _createDrawerItem(
+            icon: Icons.info,
+            text: 'À propos',
+            onTap: () => _onDrawerItemTap(context, aboutKey),
           ),
-      ]),
+          _createDrawerItem(
+            icon: Icons.folder_open,
+            text: 'Projets',
+            onTap: () => _onDrawerItemTap(context, projectsKey),
+          ),
+          _createDrawerItem(
+            icon: Icons.build_circle,
+            text: 'Compétences',
+            onTap: () => _onDrawerItemTap(context, skillsKey),
+          ),
+          _createDrawerItem(
+            icon: Icons.memory,
+            text: 'Technologies',
+            onTap: () => _onDrawerItemTap(context, technoKey),
+          ),
+          _createDrawerItem(
+            icon: Icons.contact_mail,
+            text: 'Contact',
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/contact');
+            }
+          ),
+        ],
+      )
     );
+  }
+
+  Widget _createDrawerItem({ required IconData icon, required String text, required GestureTapCallback onTap}) {
+    return Padding( 
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: ListTile(
+            leading: Icon(icon),
+            title: Text(text),
+            onTap: onTap,
+          )
+      ),
+    );
+  }
+
+  void _onDrawerItemTap(BuildContext context, GlobalKey key) {
+    Navigator.pop(context);
+    scrollToSection(key);
   }
 }
