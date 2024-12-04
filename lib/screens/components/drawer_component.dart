@@ -22,20 +22,27 @@ class DrawerComponent extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const UserAccountsDrawerHeader(
-            accountName: Text(
-              'Andrés Angulo',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ), 
-            accountEmail: Text(
-              'Développeur FullStack',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
+          UserAccountsDrawerHeader(
+            accountName: Transform.translate(
+              offset: Offset(-10, 0),
+              child: Text(
+                'Andrés Angulo',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ), 
+            ),
+            accountEmail: Transform.translate(
+              offset: Offset(-10, 0),
+              child: Text(
+                textAlign: TextAlign.justify,
+                'Développeur Web & Mobile',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
             decoration: BoxDecoration(
