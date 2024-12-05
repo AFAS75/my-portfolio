@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart;
 
 class ContactScreen extends StatefulWidget {
-  const ContactScreen({super.key});
+  const ContactScreen({ super.key });
 
    @override
    ContactScreenState createState() => ContactScreenState();
@@ -149,7 +149,7 @@ class ContactScreenState extends State<ContactScreen> {
                 const SizedBox(height: 16.0),
                 _buildTextField(
                   controller: _lastNameController, 
-                  labelText: 'Nom', 
+                  labelText: 'Nom*', 
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer votre nom';
@@ -166,7 +166,7 @@ class ContactScreenState extends State<ContactScreen> {
                 ),
                 _buildTextField(
                   controller: _emailController, 
-                  labelText: 'email',
+                  labelText: 'email*',
                   keyboardType: TextInputType.emailAddress, 
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -191,7 +191,7 @@ class ContactScreenState extends State<ContactScreen> {
                 ),
                 _buildTextField(
                   controller: _messageController, 
-                  labelText: 'Message',
+                  labelText: 'Message*',
                   maxLines: 5,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
