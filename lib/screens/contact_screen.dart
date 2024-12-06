@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 
 // import 'dart:convert';
 // import 'package:http/http.dart' as http;
-// import 'package:flutter_dotenv/flutter_dotenv.dart;
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({ super.key });
@@ -19,6 +21,7 @@ class ContactScreenState extends State<ContactScreen> {
   final TextEditingController _companyController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
+  bool _isSending = false;
 
   @override
   void dispose() {
@@ -31,49 +34,65 @@ class ContactScreenState extends State<ContactScreen> {
     super.dispose();
   }
 
-  // Future<void> _sendEmail() async {
-  //   final String firstName = _firstNameController.text;
-  //   final String lastName = _lastNameController.text;
-  //   final String email = _emailController.text;
-  //   final String company = _companyController.text;
-  //   final String phone = _phoneController.text;
-  //   final String message = _messageController.text;
+  void _resetForm() { 
+    _firstNameController.clear(); 
+    _lastNameController.clear(); 
+    _emailController.clear();
+    _companyController.clear(); 
+    _phoneController.clear(); 
+    _messageController.clear();
+    _formKey.currentState?.reset();
+  }
 
-  //   final response = await http.post(
-  //     Uri.parse('https://api.sendgrid.com/v3/mail/send'),
-  //     Headers: {
-  //       'Authorization': 'Bearer ${dotenv.env['SENDGRID_API']}',
-  //       'Content-type': 'application/json',
-  //     },
-  //     body: jsonEncode({
-  //       'personalization': [
-  //         {
-  //           'to': [
-  //             {'email': 'votre.email@exemple.fr'}
-  //           ],
-  //           'subject': 'Nouveau message de contact',
-  //         }
-  //       ],
-  //       'from': {'email': email},
-  //       'content': [
-  //         {
-  //           'type': 'text/plain',
-  //           'value': 'LastName: $lastName\nFirstName: $firstName\nEmail: $email\nCompany: $company\nPhone: $phone\nMessage: $message',
-  //         }
-  //       ]
-  //     })
-  //   );
+  Future<void> _sendEmail() async {
+    setState(() {
+      _isSending = true;
+    });
 
-  //   if (!mounted) return;
+    if (_formKey.currentState!.validate()) {
+      try {
+        final smtpServer = SmtpServer(
+          dotenv.env['MAILTRAP_HOST']!,
+          port: int.parse(dotenv.env['MAILTRAP_PORT']!),
+          username: dotenv.env['MAILTRAP_USERNAME'],
+          password: dotenv.env['MAILTRAP_PASSWORD'],
+        );
 
-  //   if (response.statusCOde == 202) {
-  //     _showSuccessDialog();
-  //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Failed ton send email')),
-  //     );
-  //   }
-  // }
+        final message = Message()
+        ..from = Address(dotenv.env['MAILTRAP_FROM']!,'${_firstNameController.text} ${_lastNameController.text}')
+        ..recipients.add(dotenv.env['MAILTRAP_TO']!)
+        ..subject = 'New contact message'
+        ..text = 'LastName: ${_lastNameController.text}\n'
+                  'FirstName: ${_firstNameController.text}\n'
+                  'Email: ${_emailController.text}\n'
+                  'Company: ${_companyController.text}\n'
+                  'Phone: ${_phoneController.text}\n'
+                  'Message: ${_messageController.text}';
+
+          final sendReport = await send(message, smtpServer);
+          _showSuccessDialog();
+          print('Message envoyé: ${sendReport.toString()}');
+      } on MailerException catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send email : ${error.message}'),)
+        );
+        print('Erreur lors de l\'envoi de l\'email: ${error.message}');
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar( 
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+        print('Error: ${e.toString()}');
+      } finally {
+        setState(() {
+          _isSending = false;
+        });
+      }
+    } else {
+      setState(() {
+        _isSending = false;
+      });
+    }
+  }
 
   void _showSuccessDialog() {
     showDialog(
@@ -85,7 +104,13 @@ class ContactScreenState extends State<ContactScreen> {
           actions: [
             TextButton(
               onPressed: () {
+                _resetForm;
                 Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => const ContactScreen(),
+                  ),
+                );
               }, 
               child: const Text('OK'),
             ),
@@ -202,10 +227,12 @@ class ContactScreenState extends State<ContactScreen> {
                   icon: Icons.message,
                 ),
                 const SizedBox(height: 16.0),
-                ElevatedButton(
+                _isSending 
+                  ? Center(child: CircularProgressIndicator()) 
+                  : ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // _sendEmail();
+                      _sendEmail();
                       print('OK TU ES FORT');
                     }
                   }, 
@@ -249,5 +276,4 @@ class ContactScreenState extends State<ContactScreen> {
       )
     );
   }
-
 }
