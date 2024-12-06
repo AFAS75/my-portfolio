@@ -3,8 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 
-// import 'dart:convert';
-// import 'package:http/http.dart' as http;
+import '../components/success_dialog_component.dart';
+import '../components/form_contact_component.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({ super.key });
@@ -69,19 +69,18 @@ class ContactScreenState extends State<ContactScreen> {
                   'Phone: ${_phoneController.text}\n'
                   'Message: ${_messageController.text}';
 
-          final sendReport = await send(message, smtpServer);
+          await send(message, smtpServer);
           _showSuccessDialog();
-          print('Message envoyé: ${sendReport.toString()}');
       } on MailerException catch (error) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to send email : ${error.message}'),)
         );
-        print('Erreur lors de l\'envoi de l\'email: ${error.message}');
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar( 
           SnackBar(content: Text('Error: ${e.toString()}')),
         );
-        print('Error: ${e.toString()}');
       } finally {
         setState(() {
           _isSending = false;
@@ -98,23 +97,11 @@ class ContactScreenState extends State<ContactScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Succès'),
-          content: const Text('Votre message a bien été envoyé !'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _resetForm;
-                Navigator.of(context).pop();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const ContactScreen(),
-                  ),
-                );
-              }, 
-              child: const Text('OK'),
-            ),
-          ],
+        return SuccessDialogComponent(
+          onOkPressed: () {
+            Navigator.of(context).pop();
+          },
+          resetForm: _resetForm
         );
       },
     );
@@ -149,131 +136,20 @@ class ContactScreenState extends State<ContactScreen> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              children: [
-                Text(
-                  'Vous souhaitez me contacter ?',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4.0),
-                Text(
-                  'N\'hésitez pas à me laisser un message. Je vous contacterai dès que possible !',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14.0
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16.0),
-                _buildTextField(
-                  controller: _lastNameController, 
-                  labelText: 'Nom*', 
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre nom';
-                    } 
-                    return null;
-                  },
-                  icon: Icons.person_outline,
-                ),
-                _buildTextField(
-                  controller: _firstNameController, 
-                  labelText: 'Prénom', 
-                  validator: (value) => null,
-                  icon: Icons.person,
-                ),
-                _buildTextField(
-                  controller: _emailController, 
-                  labelText: 'email*',
-                  keyboardType: TextInputType.emailAddress, 
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre email';
-                    } 
-                    return null;
-                  },
-                  icon: Icons.email,
-                ),
-                _buildTextField(
-                  controller: _companyController, 
-                  labelText: 'Société', 
-                  validator: (value) => null,
-                  icon: Icons.business,
-                ),
-                _buildTextField(
-                  controller: _phoneController, 
-                  labelText: 'Téléphone', 
-                  keyboardType: TextInputType.phone,
-                  validator: (value) => null,
-                  icon: Icons.phone,
-                ),
-                _buildTextField(
-                  controller: _messageController, 
-                  labelText: 'Message*',
-                  maxLines: 5,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre message';
-                    } 
-                    return null;
-                  },
-                  icon: Icons.message,
-                ),
-                const SizedBox(height: 16.0),
-                _isSending 
-                  ? Center(child: CircularProgressIndicator()) 
-                  : ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _sendEmail();
-                      print('OK TU ES FORT');
-                    }
-                  }, 
-                  child: const Text('Envoyer'),
-                ),
-              ],
+          child: FormContactComponent(
+            formKey: _formKey, 
+            firstNameController: _firstNameController, 
+            lastNameController: _lastNameController, 
+            emailController: _emailController, 
+            companyController: _companyController, 
+            phoneController: _phoneController, 
+            messageController: _messageController, 
+            isSending: _isSending, 
+            sendEmail: _sendEmail,
             ),
-          ),     
+           
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String labelText,
-    required String? Function(String?) validator,
-    TextInputType keyboardType = TextInputType.text,
-    int maxLines = 1,
-    IconData? icon,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: labelText,
-          border: const OutlineInputBorder(),
-          prefixIcon: icon != null ? Icon(icon) : null,
-          filled: true,
-          fillColor: Colors.white,
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black, width: 2),
-            borderRadius: BorderRadius.circular(8.0)
-          ),
-          labelStyle: TextStyle(color: Colors.black),
-        ),
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        validator: validator,
-      )
     );
   }
 }
